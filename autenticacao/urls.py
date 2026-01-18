@@ -10,4 +10,6 @@ urlpatterns = [
     
     # Rota para encerrar a sessão
     path('logout/', views.logout_view, name='logout'),
+
+    path('alterar-senha/', views.alterar_senha_view, name='alterar_senha'), # <-- Nova rota
 ]
