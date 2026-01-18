@@ -27,10 +27,10 @@
             </div>
 
             <div class="flex gap-6 items-center">
-                <a href="/home/" class="hover:text-blue-300">Início</a>
+                <a href="{% url 'home' %}" class="hover:text-blue-300">Início</a>
 
                 {% if request.session.user_perfil == 'Admin' or request.session.user_perfil == 'Gerente' %}
-                <a href="/eventos/cadastro/" class="hover:text-blue-300">Gerenciar Eventos</a>
+                <a href="#" class="hover:text-blue-300">Gerenciar Eventos</a>
                 {% endif %}
 
                 {% if request.session.user_perfil == 'Empresa' %}
@@ -60,7 +60,16 @@
                 <a href="/auth/usuarios/" class="hover:text-blue-300">Usuários</a>
                 {% endif %}
 
-                <a href="{% url 'logout' %}" class="text-red-400 hover:text-red-300 font-medium">Sair</a>
+                    <a href="{% url 'logout' %}"
+                        class="text-red-400 hover:text-red-300 font-medium flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                        </svg>
+                        Sair
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
