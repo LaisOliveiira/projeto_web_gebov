@@ -6,6 +6,8 @@ urlpatterns = [
     
     # Inclui as rotas do seu app de autenticação
     path('', include('autenticacao.urls')),
+
+    path('eventos/', include('eventos.urls')),
     
     # Aqui você incluirá o app de eventos no futuro
     # path('eventos/', include('eventos.urls')),

@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from autenticacao.models import Perfil, Usuario
+from eventos.models import *
 
 class Command(BaseCommand):
     help = 'Popula o banco com perfis e usuários iniciais'
@@ -31,5 +32,10 @@ class Command(BaseCommand):
                     perfil=perfis_criados[dados['perfil']]
                 )
                 self.stdout.write(f"✓ Usuário '{dados['nome']}' criado (Senha: 123).")
+
+                # No handle do seu comando de seed:
+        tipos = ['Mini Curso', 'Palestra']
+        for nome in tipos:
+            TipoEvento.objects.get_or_create(nome=nome)
 
         self.stdout.write(self.style.SUCCESS("Banco de dados pronto para uso!"))
