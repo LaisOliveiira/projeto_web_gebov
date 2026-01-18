@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div x-data="{ 
+    modoEdicao: false, 
+    selecionarEvento(ev) {
+        this.modoEdicao = true;
+        document.getElementById('id_evento').value = ev.id;
+        document.getElementById('titulo').value = ev.titulo;
+        document.getElementById('responsavel').value = ev.responsavel;
+        document.getElementById('data').value = ev.data;
+        document.getElementById('horario').value = ev.horario;
+        document.getElementById('local').value = ev.local;
+        document.getElementById('tipo').value = ev.tipo_id;
+        document.getElementById('descricao').value = ev.descricao;
+        document.getElementById('acao').value = 'alterar';
+    }
+}">
+    <h1 class="text-2xl font-bold mb-6">Gerenciar Eventos</h1>
+
+    <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-800 text-white">
+                <tr>
+                    <th class="p-4">Título</th>
+                    <th class="p-4">Data/Hora</th>
+                    <th class="p-4">Responsável</th>
+                    <th class="p-4 text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ev in eventos %}
+                <tr class="border-b hover:bg-gray-50 cursor-pointer" @click="selecionarEvento({
+                        id: '{{ ev.id }}',
+                        titulo: '{{ ev.titulo|escapejs }}',
+                        responsavel: '{{ ev.responsavel|escapejs }}',
+                        data: '{{ ev.data_evento|date:'Y-m-d' }}',
+                        horario: '{{ ev.horario_evento|time:'H:i' }}',
+                        local: '{{ ev.local|escapejs }}',
+                        tipo_id: '{{ ev.tipo.id }}',
+                        descricao: '{{ ev.descricao|escapejs }}'
+                    })">
+                    <td class="p-4 font-medium">{{ ev.titulo }}</td>
+                    <td class="p-4">{{ ev.data_evento }} às {{ ev.horario_evento }}</td>
+                    <td class="p-4">{{ ev.responsavel }}</td>
+                    <td class="p-4 text-center">
+                        <form method="POST" class="inline" onsubmit="return confirm('Apagar este evento?')">
+                            {% csrf_token %}
+                            <input type="hidden" name="acao" value="excluir">
+                            <input type="hidden" name="id" value="{{ ev.id }}">
+                            <button type="submit" class="text-red-600 hover:text-red-900">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md border" x-show="modoEdicao">
+        <h2 class="text-xl font-bold mb-4 text-slate-800">Editar Detalhes do Evento</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="id_evento">
+            <input type="hidden" name="acao" id="acao" value="alterar">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Título</label>
+                    <input type="text" name="titulo" id="titulo" required
+                        class="w-full border p-2 rounded focus:ring-2 focus:ring-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Palestrante/Responsável</label>
+                    <input type="text" name="responsavel" id="responsavel" required
+                        class="w-full border p-2 rounded focus:ring-2 focus:ring-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Data</label>
+                    <input type="date" name="data" id="data" required class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Horário</label>
+                    <input type="time" name="horario_evento" id="horario" required class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Local/Link</label>
+                    <input type="text" name="local" id="local" required class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Tipo</label>
+                    <select name="tipo_id" id="tipo" required class="w-full border p-2 rounded bg-white">
+                        {% for t in tipos %}
+                        <option value="{{ t.id }}">{{ t.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <label class="block text-xs font-bold text-gray-500 uppercase">Descrição</label>
+                <textarea name="descricao" id="descricao" required class="w-full border p-2 rounded"
+                    rows="3"></textarea>
+            </div>
+
+            <div class="mt-6 flex gap-3">
+                <button type="submit"
+                    class="bg-slate-800 text-white px-6 py-2 rounded-lg font-bold hover:bg-slate-700 transition">
+                    Atualizar Evento
+                </button>
+                <button type="button" @click="modoEdicao = false"
+                    class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-bold hover:bg-gray-300 transition">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -44,5 +44,59 @@ def cadastro_evento_view(request):
         )
         return redirect('home')
 
+
     tipos = TipoEvento.objects.all()
     return render(request, 'cadastro_evento.html', {'tipos': tipos})
+
+
+def gerenciar_eventos_view(request):
+    # Proteção de acesso
+    if 'user_id' not in request.session:
+        return redirect('login')
+    
+    if request.session.get('user_perfil') != 'Empresa':
+        messages.error(request, 'Acesso negado.')
+        return redirect('home')
+
+    if request.method == 'POST':
+        acao = request.POST.get('acao')
+        evento_id = request.POST.get('id')
+
+        # EXCLUIR EVENTO
+        if acao == 'excluir':
+            try:
+                evento = Evento.objects.get(id=evento_id)
+                evento.delete()
+                messages.success(request, 'Evento removido com sucesso!')
+            except Evento.DoesNotExist:
+                messages.error(request, 'Evento não encontrado.')
+
+        # EDITAR EVENTO (ALTERAR)
+        elif acao == 'alterar':
+            try:
+                evento = Evento.objects.get(id=evento_id)
+                evento.titulo = request.POST.get('titulo')
+                evento.descricao = request.POST.get('descricao')
+                evento.data_evento = request.POST.get('data')
+                evento.horario_evento = request.POST.get('horario_evento') # Nome corrigido
+                evento.responsavel = request.POST.get('responsavel')
+                evento.local = request.POST.get('local')
+                evento.tipo_id = request.POST.get('tipo_id')
+                
+                evento.save()
+                messages.success(request, 'Evento atualizado com sucesso!')
+            except Evento.DoesNotExist:
+                messages.error(request, 'Erro ao atualizar: Evento não encontrado.')
+
+        return redirect('gerenciar_eventos')
+
+    # GET - Listagem
+    eventos = Evento.objects.all().order_by('-data_evento')
+    tipos = TipoEvento.objects.all()
+    
+    return render(request, 'gerenciar_eventos.html', {
+        'eventos': eventos,
+        'tipos': tipos,
+    })
+
+

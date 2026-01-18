@@ -4,4 +4,5 @@ from . import views
 urlpatterns = [
     # Rota: localhost:8000/eventos/cadastro/
     path('cadastro/', views.cadastro_evento_view, name='cadastro_evento'),
+    path('gerenciar/', views.gerenciar_eventos_view, name='gerenciar_eventos'),
 ]
