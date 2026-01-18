@@ -33,6 +33,16 @@
                 <a href="/eventos/cadastro/" class="hover:text-blue-300">Gerenciar Eventos</a>
                 {% endif %}
 
+                {% if request.session.user_perfil == 'Empresa' %}
+                <a href="{% url 'cadastro_evento' %}" class="hover:text-blue-300 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Cadastrar Evento
+                </a>
+                {% endif %}
+
                 {% if request.session.user_perfil == 'Admin' %}
                 <a href="/auth/usuarios/" class="hover:text-blue-300">Usuários</a>
                 {% endif %}
