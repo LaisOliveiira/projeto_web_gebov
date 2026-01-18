@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from .models import Usuario
 from eventos.models import Evento, Inscricao
 
@@ -65,3 +66,35 @@ def home_view(request):
         'inscricoes_usuario': inscricoes_usuario,
     }
     return render(request, 'home.html', context)
+
+def alterar_senha_view(request):
+    # Proteção de acesso: só logados entram
+    if 'user_id' not in request.session:
+        return redirect('login')
+
+    if request.method == 'POST':
+        senha_atual = request.POST.get('senha_atual')
+        nova_senha = request.POST.get('nova_senha')
+        confirmacao = request.POST.get('confirmacao')
+
+        try:
+            usuario = Usuario.objects.get(id=request.session['user_id'])
+
+            # 1. Verificar se a senha atual está correta
+            if not usuario.verificar_senha(senha_atual):
+                messages.error(request, 'Sua senha atual está incorreta.')
+            
+            # 2. Verificar se a nova senha e a confirmação batem
+            elif nova_senha != confirmacao:
+                messages.error(request, 'A nova senha e a confirmação não coincidem.')
+            
+            # 3. Sucesso: Atualizar a senha
+            else:
+                usuario.senha = nova_senha # O save() faz o hash automático no model
+                usuario.save()
+                messages.success(request, 'Senha alterada com sucesso!')
+                return redirect('home')
+        except Usuario.DoesNotExist:
+            return redirect('login')
+
+    return render(request, 'alterar_senha.html')
