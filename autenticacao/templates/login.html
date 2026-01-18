@@ -1,0 +1,17 @@
+<form method="POST" action="{% url 'login' %}" class="space-y-4">
+    {% csrf_token %}
+
+    <div>
+        <label class="block text-sm font-medium text-gray-700">E-mail</label>
+        <input type="email" name="email" required class="w-full mt-1 px-3 py-2 border rounded-md">
+    </div>
+
+    <div>
+        <label class="block text-sm font-medium text-gray-700">Senha</label>
+        <input type="password" name="senha" required class="w-full mt-1 px-3 py-2 border rounded-md">
+    </div>
+
+    <button type="submit" class="w-full bg-slate-800 text-white py-2 rounded-md hover:bg-slate-700 transition">
+        Entrar no Sistema
+    </button>
+</form>     

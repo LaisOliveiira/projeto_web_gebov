@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Meu Projeto{% endblock %}</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    {% if request.session.user_id %}
+    <nav class="bg-slate-800 text-white shadow-md" x-data="{ open: false }">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <span class="font-bold text-xl">SISTEMA EVENTOS</span>
+                <span class="text-xs bg-slate-700 px-2 py-1 rounded">
+                    {{ request.session.user_perfil }}
+                </span>
+            </div>
+
+            <div class="flex gap-6 items-center">
+                <a href="/home/" class="hover:text-blue-300">Início</a>
+
+                {% if request.session.user_perfil == 'Admin' or request.session.user_perfil == 'Gerente' %}
+                <a href="/eventos/cadastro/" class="hover:text-blue-300">Gerenciar Eventos</a>
+                {% endif %}
+
+                {% if request.session.user_perfil == 'Admin' %}
+                <a href="/auth/usuarios/" class="hover:text-blue-300">Usuários</a>
+                {% endif %}
+
+                <a href="{% url 'logout' %}" class="text-red-400 hover:text-red-300 font-medium">Sair</a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="container mx-auto px-4 py-8 flex-grow">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="bg-white border-t py-4 text-center text-gray-500 text-sm">
+        &copy; 2026 - Sistema de Eventos Personalizado
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>
