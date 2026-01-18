@@ -43,3 +43,16 @@ class Evento(models.Model):
 
     def __str__(self):
         return f"{self.titulo} - {self.responsavel}"
+
+class Inscricao(models.Model):
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, verbose_name="Participante")
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE, verbose_name="Evento")
+    data_inscricao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'inscricao'
+        # Garante que o usuário não se inscreva duas vezes no mesmo evento
+        unique_together = ('usuario', 'evento') 
+
+    def __str__(self):
+        return f"{self.usuario.nome} em {self.evento.titulo}"

@@ -99,4 +99,33 @@ def gerenciar_eventos_view(request):
         'tipos': tipos,
     })
 
+def inscrever_evento_view(request):
+    if request.method == 'POST' and 'user_id' in request.session:
+        evento_id = request.POST.get('evento_id')
+        user_id = request.session['user_id']
+        user_perfil = request.session.get('user_perfil')
+
+        try:
+            evento = Evento.objects.get(id=evento_id)
+
+            # Validação 1: Não permite inscrição em Palestras
+            if evento.tipo.nome == 'Palestra':
+                messages.error(request, 'Palestras não exigem inscrição.')
+                return redirect('home')
+
+            # Validação 2: Mini Curso apenas para Pessoa Comum
+            if evento.tipo.nome == 'Mini Curso' and user_perfil != 'Cliente':
+                messages.error(request, 'Apenas usuários comuns podem se inscrever em mini cursos.')
+                return redirect('home')
+
+            # Se passar nas regras, cria a inscrição
+            Inscricao.objects.get_or_create(usuario_id=user_id, evento_id=evento_id)
+            messages.success(request, f'Inscrição em "{evento.titulo}" confirmada!')
+            
+        except Evento.DoesNotExist:
+            messages.error(request, 'Evento não encontrado.')
+        
+        return redirect('home')
+    
+    return redirect('login')
 
