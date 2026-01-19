@@ -1,10 +1,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div x-data="{ 
+<div class="max-w-6xl mx-auto py-8 px-4" x-data="{ 
     modoEdicao: false, 
-    selecionarEvento(ev) {
+    eventoSelecionado: {},
+    abrirEdicao(ev) {
+        this.eventoSelecionado = ev;
         this.modoEdicao = true;
+        // Preenche os campos do formulário via ID como você já faz
         document.getElementById('id_evento').value = ev.id;
         document.getElementById('titulo').value = ev.titulo;
         document.getElementById('responsavel').value = ev.responsavel;
@@ -13,107 +16,171 @@
         document.getElementById('local').value = ev.local;
         document.getElementById('tipo').value = ev.tipo_id;
         document.getElementById('descricao').value = ev.descricao;
-        document.getElementById('acao').value = 'alterar';
     }
 }">
-    <h1 class="text-2xl font-bold mb-6">Gerenciar Eventos</h1>
-
-    <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
-        <table class="w-full text-left border-collapse">
-            <thead class="bg-slate-800 text-white">
-                <tr>
-                    <th class="p-4">Título</th>
-                    <th class="p-4">Data/Hora</th>
-                    <th class="p-4">Responsável</th>
-                    <th class="p-4 text-center">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for ev in eventos %}
-                <tr class="border-b hover:bg-gray-50 cursor-pointer" @click="selecionarEvento({
-                        id: '{{ ev.id }}',
-                        titulo: '{{ ev.titulo|escapejs }}',
-                        responsavel: '{{ ev.responsavel|escapejs }}',
-                        data: '{{ ev.data_evento|date:'Y-m-d' }}',
-                        horario: '{{ ev.horario_evento|time:'H:i' }}',
-                        local: '{{ ev.local|escapejs }}',
-                        tipo_id: '{{ ev.tipo.id }}',
-                        descricao: '{{ ev.descricao|escapejs }}'
-                    })">
-                    <td class="p-4 font-medium">{{ ev.titulo }}</td>
-                    <td class="p-4">{{ ev.data_evento }} às {{ ev.horario_evento }}</td>
-                    <td class="p-4">{{ ev.responsavel }}</td>
-                    <td class="p-4 text-center">
-                        <form method="POST" class="inline" onsubmit="return confirm('Apagar este evento?')">
-                            {% csrf_token %}
-                            <input type="hidden" name="acao" value="excluir">
-                            <input type="hidden" name="id" value="{{ ev.id }}">
-                            <button type="submit" class="text-red-600 hover:text-red-900">Excluir</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="mb-10 border-l-8 border-gebov pl-6 flex justify-between items-end">
+        <div>
+            <h1 class="text-4xl font-black text-slate-800 tracking-tighter uppercase italic">Gestão de Eventos</h1>
+            <p class="text-gray-500 font-medium uppercase text-[10px] tracking-[0.3em]">Controle total das suas
+                publicações</p>
+        </div>
+        <a href="{% url 'cadastro_evento' %}"
+            class="bg-gebov text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition shadow-lg shadow-gebov/20">
+            + Criar Novo
+        </a>
     </div>
 
-    <div class="bg-white p-6 rounded-lg shadow-md border" x-show="modoEdicao">
-        <h2 class="text-xl font-bold mb-4 text-slate-800">Editar Detalhes do Evento</h2>
-        <form method="POST">
-            {% csrf_token %}
-            <input type="hidden" name="id" id="id_evento">
-            <input type="hidden" name="acao" id="acao" value="alterar">
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Título</label>
-                    <input type="text" name="titulo" id="titulo" required
-                        class="w-full border p-2 rounded focus:ring-2 focus:ring-slate-800">
+    <div class="grid grid-cols-1 gap-4">
+        {% for ev in eventos %}
+        <div
+            class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center hover:shadow-md transition-all group">
+            <div class="flex-grow">
+                <div class="flex items-center gap-3 mb-2">
+                    <span
+                        class="px-2 py-0.5 bg-gebov/10 text-gebov text-[10px] font-black rounded uppercase border border-gebov/20">
+                        {{ ev.tipo.nome }}
+                    </span>
+                    <span class="text-gray-400 text-[10px] font-bold uppercase tracking-widest">{{
+                        ev.data_evento|date:"d/m/Y" }}</span>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Palestrante/Responsável</label>
-                    <input type="text" name="responsavel" id="responsavel" required
-                        class="w-full border p-2 rounded focus:ring-2 focus:ring-slate-800">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Data</label>
-                    <input type="date" name="data" id="data" required class="w-full border p-2 rounded">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Horário</label>
-                    <input type="time" name="horario_evento" id="horario" required class="w-full border p-2 rounded">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Local/Link</label>
-                    <input type="text" name="local" id="local" required class="w-full border p-2 rounded">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Tipo</label>
-                    <select name="tipo_id" id="tipo" required class="w-full border p-2 rounded bg-white">
-                        {% for t in tipos %}
-                        <option value="{{ t.id }}">{{ t.nome }}</option>
-                        {% endfor %}
-                    </select>
+                <h3
+                    class="text-xl font-black text-slate-800 uppercase italic tracking-tighter group-hover:text-gebov transition-colors">
+                    {{ ev.titulo }}</h3>
+                <div class="flex gap-4 mt-1 text-xs text-gray-400 font-medium italic">
+                    <p>🎤 {{ ev.responsavel }}</p>
+                    <p>📍 {{ ev.local }}</p>
+                    <p>⏰ {{ ev.horario_evento|time:"H:i" }}</p>
                 </div>
             </div>
 
-            <div class="mt-4">
-                <label class="block text-xs font-bold text-gray-500 uppercase">Descrição</label>
-                <textarea name="descricao" id="descricao" required class="w-full border p-2 rounded"
-                    rows="3"></textarea>
-            </div>
-
-            <div class="mt-6 flex gap-3">
-                <button type="submit"
-                    class="bg-slate-800 text-white px-6 py-2 rounded-lg font-bold hover:bg-slate-700 transition">
-                    Atualizar Evento
+            <div class="flex items-center gap-6 mt-4 md:mt-0">
+                <button @click="abrirEdicao({
+                    id: '{{ ev.id }}',
+                    titulo: '{{ ev.titulo|escapejs }}',
+                    responsavel: '{{ ev.responsavel|escapejs }}',
+                    data: '{{ ev.data_evento|date:'Y-m-d' }}',
+                    horario: '{{ ev.horario_evento|time:'H:i' }}',
+                    local: '{{ ev.local|escapejs }}',
+                    tipo_id: '{{ ev.tipo.id }}',
+                    descricao: '{{ ev.descricao|escapejs }}'
+                })"
+                    class="flex items-center gap-2 text-slate-400 hover:text-gebov font-black text-[10px] uppercase tracking-widest transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                    Editar
                 </button>
-                <button type="button" @click="modoEdicao = false"
-                    class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-bold hover:bg-gray-300 transition">
-                    Cancelar
-                </button>
+
+                <form method="POST" onsubmit="return confirm('Apagar este evento permanentemente?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="acao" value="excluir">
+                    <input type="hidden" name="id" value="{{ ev.id }}">
+                    <button type="submit"
+                        class="flex items-center gap-2 text-red-300 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Excluir
+                    </button>
+                </form>
             </div>
-        </form>
+        </div>
+        {% empty %}
+        <div class="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-100">
+            <p class="text-gray-400 font-bold uppercase tracking-widest text-sm">Nenhum evento cadastrado ainda.</p>
+        </div>
+        {% endfor %}
     </div>
-</div>
-{% endblock %}
+
+    <div x-show="modoEdicao"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+        x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100" style="display: none;">
+
+        <div class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden"
+            @click.away="modoEdicao = false">
+            <div class="bg-gebov p-8 flex justify-between items-center text-white">
+                <h2 class="text-2xl font-black italic uppercase tracking-tighter">Editar Evento</h2>
+                <button @click="modoEdicao = false" class="hover:rotate-90 transition-transform duration-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form method="POST" class="p-8 space-y-5">
+                {% csrf_token %}
+                <input type="hidden" name="id" id="id_evento">
+                <input type="hidden" name="acao" id="acao" value="alterar">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="md:col-span-2">
+                        <label
+                            class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Título</label>
+                        <input type="text" name="titulo" id="titulo" required
+                            class="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gebov/10 focus:border-gebov outline-none">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Palestrante /
+                            Responsável</label>
+                        <input type="text" name="responsavel" id="responsavel" required
+                            class="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gebov/10 focus:border-gebov outline-none">
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Data</label>
+                        <input type="date" name="data" id="data" required
+                            class="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gebov/10 focus:border-gebov">
+                    </div>
+
+                    <div>
+                        <label
+                            class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Horário</label>
+                        <input type="time" name="horario_evento" id="horario" required
+                            class="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gebov/10 focus:border-gebov">
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Local ou
+                            Link</label>
+                        <input type="text" name="local" id="local" required
+                            class="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gebov/10 focus:border-gebov">
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Tipo de
+                            Evento</label>
+                        <select name="tipo_id" id="tipo" required
+                            class="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gebov/10 focus:border-gebov bg-white">
+                            {% for t in tipos %}
+                            <option value="{{ t.id }}">{{ t.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label
+                            class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descrição</label>
+                        <textarea name="descricao" id="descricao" rows="3" required
+                            class="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gebov/10 focus:border-gebov outline-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 pt-6">
+                    <button type="submit"
+                        class="flex-1 bg-gebov text-white font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest hover:bg-slate-800 transition shadow-lg shadow-gebov/20">
+                        Salvar Alterações
+                    </button>
+                    <button type="button" @click="modoEdicao = false"
+                        class="flex-1 bg-gray-100 text-gray-400 font-bold py-4 rounded-2xl uppercase text-[10px] tracking-widest">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endblock %}
