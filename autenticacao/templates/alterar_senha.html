@@ -1,31 +1,97 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="max-w-md mx-auto mt-10 bg-white p-8 rounded-xl shadow-md border border-gray-100">
-    <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center">Alterar Minha Senha</h2>
+<div class="min-h-[70vh] flex items-center justify-center py-10 px-4" x-data="{ showSensible: false }">
+    <div
+        class="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100 transition-all">
 
-    <form method="POST" class="space-y-4">
-        {% csrf_token %}
-        <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Senha Atual</label>
-            <input type="password" name="senha_atual" required
-                class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none">
-        </div>
-        <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nova Senha</label>
-            <input type="password" name="nova_senha" required
-                class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none">
-        </div>
-        <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Confirmar Nova Senha</label>
-            <input type="password" name="confirmacao" required
-                class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none">
+        <div class="bg-gebov py-8 text-center text-white">
+            <div class="inline-flex items-center justify-center w-12 h-12 bg-white/20 rounded-xl mb-3 backdrop-blur-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </div>
+            <h2 class="text-xl font-black uppercase italic tracking-tighter">Segurança da Conta</h2>
+            <p class="text-white/60 text-[10px] font-bold uppercase tracking-widest mt-1">Atualize sua senha de acesso
+            </p>
         </div>
 
-        <button type="submit"
-            class="w-full bg-slate-800 text-white font-bold py-3 rounded-lg hover:bg-slate-700 transition shadow-lg">
-            Atualizar Senha
-        </button>
-    </form>
+        <div class="p-8 lg:p-10">
+            {% if messages %}
+            <div class="max-w-6xl mx-auto px-4 mb-6">
+                {% for message in messages %}
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+                    class="flex items-center justify-between p-4 rounded-2xl border shadow-sm transition-all duration-300 {% if message.tags == 'success' %}bg-green-50 text-green-700 border-green-200{% else %}bg-blue-50 text-blue-700 border-blue-200{% endif %}">
+
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-xs font-black uppercase tracking-widest">{{ message }}</span>
+                    </div>
+
+                    <button @click="show = false" class="hover:opacity-50">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="POST" class="space-y-5">
+                {% csrf_token %}
+
+                <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Senha
+                        Atual</label>
+                    <input :type="showSensible ? 'text' : 'password'" name="senha_atual" required
+                        class="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gebov/10 focus:border-gebov outline-none transition-all placeholder:text-gray-300">
+                </div>
+
+                <div class="border-t border-gray-100 my-2 pt-4">
+                    <div class="mb-5">
+                        <label
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Nova
+                            Senha</label>
+                        <input :type="showSensible ? 'text' : 'password'" name="nova_senha" required
+                            class="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gebov/10 focus:border-gebov outline-none transition-all">
+                    </div>
+
+                    <div>
+                        <label
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Confirmar
+                            Nova Senha</label>
+                        <input :type="showSensible ? 'text' : 'password'" name="confirmacao" required
+                            class="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-gebov/10 focus:border-gebov outline-none transition-all">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 px-1">
+                    <input type="checkbox" id="toggle" @click="showSensible = !showSensible"
+                        class="rounded text-gebov focus:ring-gebov border-gray-300">
+                    <label for="toggle"
+                        class="text-[10px] font-bold text-gray-400 uppercase tracking-wide cursor-pointer">Mostrar
+                        senhas</label>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit"
+                        class="w-full bg-gebov text-white font-black py-4 rounded-2xl hover:bg-slate-800 shadow-xl shadow-gebov/20 transform hover:-translate-y-1 transition-all duration-300 uppercase tracking-widest text-xs">
+                        Confirmar Alteração
+                    </button>
+                    <a href="{% url 'home' %}"
+                        class="block text-center mt-4 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gebov transition">
+                        Voltar para Início
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}
