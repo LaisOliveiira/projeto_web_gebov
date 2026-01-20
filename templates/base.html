@@ -90,7 +90,7 @@
                     <span class="font-medium">Início</span>
                 </a>
 
-                {% if request.session.user_perfil == 'Empresa' %}
+                {% if request.session.user_perfil == 'Empresa' or request.session.user_perfil == 'Admin' %}
                 <div class="pt-4 pb-1 px-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Gestão
                     Eventos</div>
                 <a href="{% url 'cadastro_evento' %}"
@@ -112,7 +112,7 @@
 
                 {% if request.session.user_perfil == 'Admin' %}
                 <div class="pt-4 pb-1 px-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Admin</div>
-                <a href="/auth/usuarios/"
+                <a href="{% url 'lista_usuarios' %}"
                     class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl transition">
                     <svg class="h-5 w-5 text-gebov" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

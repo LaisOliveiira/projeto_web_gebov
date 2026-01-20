@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Usuários{% endblock %}
+
+{% block content %}
+<h1>Painel de Controle de Usuários</h1>
+
+<section>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Perfil Atual</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in usuarios %}
+            <tr>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" value="{{ u.id }}">
+                    
+                    <td><input type="text" name="nome" value="{{ u.nome }}"></td>
+                    <td><input type="email" name="email" value="{{ u.email }}"></td>
+                    <td>
+                        <select name="perfil_id">
+                            {% for p in perfis %}
+                                <option value="{{ p.id }}" {% if p.id == u.perfil.id %}selected{% endif %}>
+                                    {{ p.nome }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <button type="submit" name="acao" value="alterar">Atualizar</button>
+                        {% if u.id != request.session.user_id %}
+                        <button type="submit" name="acao" value="excluir" onclick="return confirm('Excluir este usuário permanentemente?')">Excluir</button>
+                        {% endif %}
+                    </td>
+                </form>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}
