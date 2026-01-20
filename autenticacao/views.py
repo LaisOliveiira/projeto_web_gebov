@@ -1,9 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Usuario, Perfil  # Importação do Perfil adicionada
+from .models import *
 from eventos.models import Evento, Inscricao
 
-# --- AUTENTICAÇÃO ---
 
 def login_view(request):
     if request.method == 'POST':
@@ -11,15 +10,19 @@ def login_view(request):
         senha = request.POST.get('senha')
 
         try:
-            usuario = Usuario.objects.get(email=email) #
+            # 1. Busca o usuário apenas pelo e-mail
+            usuario = Usuario.objects.get(email=email)
 
-            if usuario.verificar_senha(senha): #
-                # Login bem-sucedido - Salva na sessão
-                request.session['user_id'] = usuario.id #
-                request.session['user_nome'] = usuario.nome #
-                request.session['user_perfil'] = usuario.perfil.nome #
-                
-                return redirect('home') #
+            # 2. Verifica a senha
+            if usuario.verificar_senha(senha):
+                # 3. Login bem-sucedido - Salva na sessão
+                request.session['user_id'] = usuario.id
+                request.session['user_nome'] = usuario.nome
+
+                # O sistema agora identifica o perfil automaticamente do banco
+                request.session['user_perfil'] = usuario.perfil.nome
+
+                return redirect('home')
             else:
                 messages.error(request, 'Senha incorreta') #
                 return render(request, 'login.html')
@@ -72,13 +75,14 @@ def cadastro_usuario_view(request):
 
 # --- PERFIL E HOME ---
 
+
 def home_view(request):
-    if 'user_id' not in request.session: #
-        return redirect('login') #
-    
+    if 'user_id' not in request.session:
+        return redirect('login')
+
     # Buscar todos os eventos e os tipos relacionados
-    eventos = Evento.objects.select_related('tipo').all().order_by('data_evento') #
-    
+    eventos = Evento.objects.select_related('tipo').all().order_by('data_evento')
+
     # Buscar IDs dos eventos que o usuário já está inscrito
     inscricoes_usuario = Inscricao.objects.filter(
         usuario_id=request.session['user_id']
@@ -92,6 +96,7 @@ def home_view(request):
     }
     return render(request, 'home.html', context) #
 
+
 def alterar_senha_view(request):
     if 'user_id' not in request.session: #
         return redirect('login') #
@@ -104,15 +109,21 @@ def alterar_senha_view(request):
         try:
             usuario = Usuario.objects.get(id=request.session['user_id']) #
 
-            if not usuario.verificar_senha(senha_atual): #
-                messages.error(request, 'Sua senha atual está incorreta.') #
-            elif nova_senha != confirmacao: #
-                messages.error(request, 'A nova senha e a confirmação não coincidem.') #
+            # 1. Verificar se a senha atual está correta
+            if not usuario.verificar_senha(senha_atual):
+                messages.error(request, 'Sua senha atual está incorreta.')
+
+            # 2. Verificar se a nova senha e a confirmação batem
+            elif nova_senha != confirmacao:
+                messages.error(
+                    request, 'A nova senha e a confirmação não coincidem.')
+
+            # 3. Sucesso: Atualizar a senha
             else:
-                usuario.senha = nova_senha #
-                usuario.save() #
-                messages.success(request, 'Senha alterada com sucesso!') #
-                return redirect('home') #
+                usuario.senha = nova_senha  # O save() faz o hash automático no model
+                usuario.save()
+                messages.success(request, 'Senha alterada com sucesso!')
+                return redirect('home')
         except Usuario.DoesNotExist:
             return redirect('login') #
 
