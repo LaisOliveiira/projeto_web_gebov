@@ -4,7 +4,7 @@
 
 Este projeto é uma plataforma de gestão de eventos desenvolvida em **Django 5.0**, com foco na simplicidade de uso e controle rigoroso de perfis de acesso. O sistema permite o cadastro de usuários, gerenciamento de eventos por administradores/gerentes e inscrições para participantes.
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 * **Framework:** Django 5.0
 * **Banco de Dados:** PostgreSQL
