@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from autenticacao.views import *
 
 urlpatterns = [
     # Rota: localhost:8000/eventos/cadastro/

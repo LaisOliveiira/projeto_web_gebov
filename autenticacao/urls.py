@@ -12,4 +12,5 @@ urlpatterns = [
     path('lista_usuarios/', views.lista_usuarios, name='lista_usuarios'),
     path('alterar-senha/', views.alterar_senha_view, name='alterar_senha'),
     path('cadastro/', views.cadastro_usuario_view, name='cadastro_usuario'),
-    ]
+
+]
