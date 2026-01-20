@@ -134,7 +134,6 @@ def alterar_senha_view(request):
 
 
 def lista_usuarios(request):
-    # aqui está a função
     # Proteção de acesso: Somente Admin entra
     if request.session.get('user_perfil') != 'Admin':
         messages.error(request, 'Acesso negado.')
