@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from eventos.views import *
 
 urlpatterns = [
 # Tela de Login (Raiz do app auth)
@@ -14,5 +15,4 @@ urlpatterns = [
     path('alterar-senha/', views.alterar_senha_view, name='alterar_senha'),
 
     path('cadastro/', views.cadastro_usuario_view, name='cadastro_usuario'),
-
-]
+    ]

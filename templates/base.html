@@ -149,7 +149,41 @@
     </div>
     {% endif %}
 
-    <main class="container mx-auto px-4 py-8 flex-grow">
+
+<main class="container mx-auto px-4 py-8 flex-grow">
+        {% if messages %}
+        <div class="max-w-4xl mx-auto mb-8 space-y-4">
+            {% for message in messages %}
+            <div x-data="{ show: true }" x-show="show" x-transition:leave="transition ease-in duration-300"
+                x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                class="flex items-center justify-between p-4 rounded-2xl border shadow-sm {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-700{% elif message.tags == 'success' %}bg-green-50 border-green-200 text-green-700{% else %}bg-blue-50 border-blue-200 text-blue-700{% endif %}">
+
+                <div class="flex items-center gap-3">
+                    {% if message.tags == 'error' %}
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {% elif message.tags == 'success' %}
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {% endif %}
+                    <span class="text-sm font-bold uppercase tracking-tight">{{ message }}</span>
+                </div>
+
+                <button @click="show = false" class="p-1 hover:bg-black/5 rounded-lg transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         {% block content %}{% endblock %}
     </main>
 

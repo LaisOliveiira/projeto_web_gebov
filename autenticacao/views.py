@@ -51,7 +51,7 @@ def cadastro_usuario_view(request):
 
         try:
             # CORREÇÃO: Busca ou cria o objeto Perfil para satisfazer a ForeignKey
-            perfil_comum, _ = Perfil.objects.get_or_create(nome='Pessoa Comum') #
+            perfil_comum, _ = Perfil.objects.get_or_create(nome='Cliente') #
 
             novo_usuario = Usuario(
                 nome=nome,

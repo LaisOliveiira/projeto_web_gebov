@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
-from .models import Evento, TipoEvento
-from autenticacao.models import Usuario
+from .models import *
+from autenticacao.models import *
 from django.contrib import messages
 
 def cadastro_evento_view(request):
@@ -108,17 +108,17 @@ def inscrever_evento_view(request):
         try:
             evento = Evento.objects.get(id=evento_id)
 
-            # Validação 1: Não permite inscrição em Palestras
+            # 1. Validação de Tipo
             if evento.tipo.nome == 'Palestra':
-                messages.error(request, 'Palestras não exigem inscrição.')
+                messages.info(request, 'Palestras não exigem inscrição.')
                 return redirect('home')
 
-            # Validação 2: Mini Curso apenas para Pessoa Comum
+            # 2. Validação de Perfil (usando o nome do seu cadastro)
             if evento.tipo.nome == 'Mini Curso' and user_perfil != 'Cliente':
-                messages.error(request, 'Apenas usuários comuns podem se inscrever em mini cursos.')
+                messages.error(request, 'Apenas participantes podem se inscrever em mini cursos.')
                 return redirect('home')
 
-            # Se passar nas regras, cria a inscrição
+            # 3. Criação segura (get_or_create evita duplicidade no banco)
             Inscricao.objects.get_or_create(usuario_id=user_id, evento_id=evento_id)
             messages.success(request, f'Inscrição em "{evento.titulo}" confirmada!')
             
@@ -128,4 +128,3 @@ def inscrever_evento_view(request):
         return redirect('home')
     
     return redirect('login')
-
