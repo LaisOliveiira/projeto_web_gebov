@@ -56,7 +56,7 @@ def cadastro_usuario_view(request):
 
         try:
             # CORREÇÃO: Busca ou cria o objeto Perfil para satisfazer a ForeignKey
-            perfil_comum, _ = Perfil.objects.get_or_create(nome='Pessoa Comum')
+            perfil_comum, _ = Perfil.objects.get_or_create(nome='Cliente') #
 
             novo_usuario = Usuario(
                 nome=nome,
@@ -131,53 +131,3 @@ def alterar_senha_view(request):
             return redirect('login')
 
     return render(request, 'alterar_senha.html')
-
-
-def lista_usuarios(request):
-    # Proteção de acesso: Somente Admin entra
-    if request.session.get('user_perfil') != 'Admin':
-        messages.error(request, 'Acesso negado.')
-        return redirect('home')
-
-    if request.method == "POST":
-        acao = request.POST.get('acao')
-        usuario_id = request.POST.get('id')
-
-        if acao == 'excluir':
-            try:
-                if int(usuario_id) == request.session.get('user_id'):
-                    messages.error(
-                        request, 'Você não pode excluir sua própria conta.')
-                else:
-                    Usuario.objects.get(id=usuario_id).delete()
-                    messages.success(request, 'Usuário removido com sucesso!')
-            except Usuario.DoesNotExist:
-                messages.error(request, 'Usuário não encontrado.')
-
-        elif acao == 'alterar':
-            try:
-                usuario = Usuario.objects.get(id=usuario_id)
-                usuario.nome = request.POST.get('nome')
-                usuario.email = request.POST.get('email')
-
-                # Atualiza o perfil (é aqui que ocorre a promoção para Gerente/Empresa)
-                perfil_id = request.POST.get('perfil_id')
-                usuario.perfil_id = perfil_id
-
-                usuario.save()
-                messages.success(
-                    request, f'Usuário {usuario.nome} atualizado com sucesso!')
-            except Usuario.DoesNotExist:
-                messages.error(
-                    request, 'Erro ao atualizar: Usuário não encontrado.')
-
-        return redirect('lista_usuarios')
-
-    # GET - Listagem ordenada por nome
-    usuarios = Usuario.objects.all().select_related('perfil').order_by('nome')
-    perfis = Perfil.objects.all()
-
-    return render(request, 'lista_usuarios.html', {
-        'usuarios': usuarios,
-        'perfis': perfis
-    })
