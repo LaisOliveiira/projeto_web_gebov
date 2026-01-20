@@ -76,8 +76,11 @@ O sistema utiliza **Django Sessions** para controle de acesso, com três perfis 
 
    Perfis:
    user - senha
+
    admin@teste.com - 123
+   
    empresa@teste.com - 123
+
    cliente@teste.com - 123
 
 ---
