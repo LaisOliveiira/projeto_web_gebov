@@ -40,7 +40,6 @@ Com as informações completas, compilei toda a lógica do seu projeto em um gui
 
 Crie um arquivo `.env` na raiz do projeto:
 
-```env
 SECRET_KEY=sua_chave_secreta_aqui
 DEBUG=True
 
@@ -54,13 +53,15 @@ DB_PORT=5432
 
 ### 4. Banco de Dados e Inicialização
 
-Execute os comandos no terminal do PostgreSQL para criar o banco, e então rode as migrações:
+Execute os comandos no terminal do PostgreSQL para criar o banco, então rode as migrações e popule o banco:
 
 ```bash
 python manage.py makemigrations
 python manage.py migrate
-python manage.py runserver
 
+python manage.py seed_database
+
+python manage.py runserver
 ```
 
 ---
@@ -72,6 +73,12 @@ O sistema utiliza **Django Sessions** para controle de acesso, com três perfis 
 1. **Admin:** Acesso total. Gerencia a base de usuários (lista_usuarios) e pode promover um usuário comum ao perfil de **Empresa/Gerente** alterando seu atributo de perfil.
 2. **Empresa (Gerente):** Pode cadastrar novos eventos e gerenciar (editar/excluir) todos os eventos da plataforma.
 3. **Cliente (Pessoa Comum):** Pode se cadastrar no sistema, visualizar eventos na Home e se inscrever em **Mini Cursos**.
+
+   Perfis:
+   user - senha
+   admin@teste.com - 123
+   empresa@teste.com - 123
+   cliente@teste.com - 123
 
 ---
 
