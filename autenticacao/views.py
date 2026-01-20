@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Usuario
+from .models import *
 from eventos.models import Evento, Inscricao
+
 
 def login_view(request):
     if request.method == 'POST':
@@ -12,15 +13,15 @@ def login_view(request):
             # 1. Busca o usuário apenas pelo e-mail
             usuario = Usuario.objects.get(email=email)
 
-            # 2. Verifica a senha 
+            # 2. Verifica a senha
             if usuario.verificar_senha(senha):
-                # 3. Login bem-sucedido - Salva na sessão 
+                # 3. Login bem-sucedido - Salva na sessão
                 request.session['user_id'] = usuario.id
                 request.session['user_nome'] = usuario.nome
-                
-                # O sistema agora identifica o perfil automaticamente do banco 
-                request.session['user_perfil'] = usuario.perfil.nome 
-                
+
+                # O sistema agora identifica o perfil automaticamente do banco
+                request.session['user_perfil'] = usuario.perfil.nome
+
                 return redirect('home')
             else:
                 return render(request, 'login.html', {'erro': 'Senha incorreta'})
@@ -30,11 +31,12 @@ def login_view(request):
 
     return render(request, 'login.html')
 
+
 def home_view(request):
     # Proteção: Se não houver id na sessão, volta para o login
     if 'user_id' not in request.session:
         return redirect('login')
-    
+
     # Passamos os dados da sessão para o template
     context = {
         'nome': request.session.get('user_nome'),
@@ -42,18 +44,21 @@ def home_view(request):
     }
     return render(request, 'home.html', context)
 
+
 def logout_view(request):
     # O flush limpa absolutamente tudo da sessão e gera um novo ID de sessão
     request.session.flush()
     return redirect('login')
 
+
 def home_view(request):
     if 'user_id' not in request.session:
         return redirect('login')
-    
+
     # Buscar todos os eventos e os tipos relacionados
-    eventos = Evento.objects.select_related('tipo').all().order_by('data_evento')
-    
+    eventos = Evento.objects.select_related(
+        'tipo').all().order_by('data_evento')
+
     # Buscar IDs dos eventos que o usuário já está inscrito
     inscricoes_usuario = Inscricao.objects.filter(
         usuario_id=request.session['user_id']
@@ -66,6 +71,7 @@ def home_view(request):
         'inscricoes_usuario': inscricoes_usuario,
     }
     return render(request, 'home.html', context)
+
 
 def alterar_senha_view(request):
     # Proteção de acesso: só logados entram
@@ -83,14 +89,15 @@ def alterar_senha_view(request):
             # 1. Verificar se a senha atual está correta
             if not usuario.verificar_senha(senha_atual):
                 messages.error(request, 'Sua senha atual está incorreta.')
-            
+
             # 2. Verificar se a nova senha e a confirmação batem
             elif nova_senha != confirmacao:
-                messages.error(request, 'A nova senha e a confirmação não coincidem.')
-            
+                messages.error(
+                    request, 'A nova senha e a confirmação não coincidem.')
+
             # 3. Sucesso: Atualizar a senha
             else:
-                usuario.senha = nova_senha # O save() faz o hash automático no model
+                usuario.senha = nova_senha  # O save() faz o hash automático no model
                 usuario.save()
                 messages.success(request, 'Senha alterada com sucesso!')
                 return redirect('home')
@@ -98,3 +105,53 @@ def alterar_senha_view(request):
             return redirect('login')
 
     return render(request, 'alterar_senha.html')
+
+
+def lista_usuarios(request):
+    # Proteção de acesso: Somente Admin entra
+    if request.session.get('user_perfil') != 'Admin':
+        messages.error(request, 'Acesso negado.')
+        return redirect('home')
+
+    if request.method == "POST":
+        acao = request.POST.get('acao')
+        usuario_id = request.POST.get('id')
+
+        if acao == 'excluir':
+            try:
+                if int(usuario_id) == request.session.get('user_id'):
+                    messages.error(
+                        request, 'Você não pode excluir sua própria conta.')
+                else:
+                    Usuario.objects.get(id=usuario_id).delete()
+                    messages.success(request, 'Usuário removido com sucesso!')
+            except Usuario.DoesNotExist:
+                messages.error(request, 'Usuário não encontrado.')
+
+        elif acao == 'alterar':
+            try:
+                usuario = Usuario.objects.get(id=usuario_id)
+                usuario.nome = request.POST.get('nome')
+                usuario.email = request.POST.get('email')
+
+                # Atualiza o perfil (é aqui que ocorre a promoção para Gerente/Empresa)
+                perfil_id = request.POST.get('perfil_id')
+                usuario.perfil_id = perfil_id
+
+                usuario.save()
+                messages.success(
+                    request, f'Usuário {usuario.nome} atualizado com sucesso!')
+            except Usuario.DoesNotExist:
+                messages.error(
+                    request, 'Erro ao atualizar: Usuário não encontrado.')
+
+        return redirect('lista_usuarios')
+
+    # GET - Listagem ordenada por nome
+    usuarios = Usuario.objects.all().select_related('perfil').order_by('nome')
+    perfis = Perfil.objects.all()
+
+    return render(request, 'lista_usuarios.html', {
+        'usuarios': usuarios,
+        'perfis': perfis
+    })
